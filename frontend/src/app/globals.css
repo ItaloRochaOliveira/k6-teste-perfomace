@@ -1,0 +1,349 @@
+/**
+ * ZSCAN Evo — globals
+ * Tailwind v4 + shadcn/ui
+ * Tokens alinhados ao Figma Primitives (Mode 1) — todas as cores em HSL
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─────────────────────────────────────────────────────────────
+   Theme → utilitários Tailwind (bg-*, text-*, border-*)
+   ───────────────────────────────────────────────────────────── */
+@theme inline {
+  /* Tipografia — Manrope é a única fonte do projeto */
+  --font-manrope: var(--font-manrope);
+  --text-2xs: 0.625rem; /* 10px */
+  --text-2xs--line-height: 0.9375rem; /* 15px */
+  --text-3xs: 0.5rem; /* 8px */
+  --text-3xs--line-height: 0.75rem; /* 12px */
+
+  /* Superfície base */
+  --color-background: var(--background);
+  --color-background-hard: var(--background-hard);
+  --color-foreground: var(--foreground);
+
+  /* shadcn — superfícies & conteúdo */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* shadcn — marca & estados */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-muted: var(--destructive-muted);
+  --color-destructive-hover: var(--destructive-hover);
+  --color-destructive-hover-bg: var(--destructive-hover-bg);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-hover: var(--warning-hover);
+
+  /* shadcn — bordas, inputs, foco */
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-hover: var(--input-hover);
+  --color-input-focus: var(--input-focus);
+  --color-placeholder: var(--placeholder);
+  --color-ring: var(--ring);
+
+  /* Table sort */
+  --color-table-sort-foreground: var(--table-sort-foreground);
+  --color-table-sort-icon: var(--table-sort-icon);
+  --color-table-sort-active: var(--table-sort-active);
+
+  /* Gráficos */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Figma Primitives — Neutral */
+  --color-neutral-50: hsl(210 40% 98.04%);
+  --color-neutral-100: hsl(210 40% 96.08%);
+  --color-neutral-200: hsl(214.29 31.82% 91.37%);
+  --color-neutral-300: hsl(212.73 26.83% 83.92%);
+  --color-neutral-400: hsl(215 20.22% 65.1%);
+  --color-neutral-500: hsl(215.38 16.32% 46.86%);
+  --color-neutral-600: hsl(215.29 19.32% 34.51%);
+  --color-neutral-700: hsl(215.29 25% 26.67%);
+  --color-neutral-800: hsl(217.24 32.58% 17.45%);
+  --color-neutral-900: hsl(222.22 47.37% 11.18%);
+  --color-neutral-white: hsl(0 0% 100%);
+
+  /* Figma Primitives — Blue */
+  --color-blue-50: hsl(213.75 100% 96.86%);
+  --color-blue-100: hsl(214.29 94.59% 92.75%);
+  --color-blue-400: hsl(213.12 93.9% 67.84%);
+  --color-blue-500: hsl(215.38 80.25% 47.65%);
+  --color-blue-700: hsl(216.81 100% 31.96%);
+
+  /* Figma Primitives — Yellow */
+  --color-yellow-50: hsl(54.55 91.67% 95.29%);
+  --color-yellow-250: hsl(45.4 93.39% 47.45%);
+  --color-yellow-500: hsl(45.4 93.39% 47.45%);
+
+  /* Figma Primitives — Orange */
+  --color-orange-50: hsl(33.33 100% 96.47%);
+  --color-orange-500: hsl(24.58 94.98% 53.14%);
+
+  /* Figma Primitives — Red */
+  --color-red-50: hsl(0 85.71% 97.25%);
+  --color-red-100: hsl(0 94.44% 92.94%);
+  --color-red-500: hsl(0 84.24% 60.2%);
+
+  /* Figma Primitives — Green */
+  --color-green-50: hsl(138.46 76.47% 96.67%);
+  /* LiveBackup storage chart gradient (270deg): #78FDA9 → Green/500 → #08A843 */
+  --color-green-300: hsl(142.11 97.08% 73.14%);
+  --color-green-500: hsl(142.09 70.56% 45.29%);
+  --color-green-700: hsl(142.12 90.91% 34.51%);
+
+  /* Aliases legados ZSCAN → primitives (HSL) */
+  --color-zscan-blue-primary: var(--color-blue-500);
+  --color-zscan-blue-strong: hsl(213.12 93.9% 67.84%);
+  --color-zscan-blue-variant: var(--color-blue-700);
+  --color-zscan-blue-vibrant: hsl(207.22 89.47% 53.92%);
+  --color-zscan-blue-interactive: hsl(204.24 69.94% 53.14%);
+  --color-zscan-blue-light: hsl(198.63 100% 62.35%);
+  --color-zscan-blue-outline: hsl(198.75 89.47% 90.2%);
+  --color-zscan-teal: hsl(180 100% 36.27%);
+  --color-zscan-orange-brand: var(--color-orange-500);
+  --color-zscan-orange-link: hsl(45 100% 51.37%);
+  --color-zscan-neutral-text: var(--color-neutral-800);
+  --color-zscan-neutral-gray: hsl(0 0% 25.88%);
+  --color-zscan-neutral-border: var(--color-neutral-500);
+  --color-zscan-neutral-bg: hsl(0 0% 96.08%);
+  --color-zscan-neutral-icon: hsl(0 0% 38.04%);
+  --color-zscan-neutral-caption: var(--color-neutral-600);
+
+  /* Gradientes ZSCAN (HSL) */
+  --color-zscan-gradient-start: hsl(198.75 75% 73.73%);
+  --color-zscan-gradient-mid: hsl(207.22 72% 56.86%);
+  --color-zscan-gradient-end: hsl(207.22 76% 46.08%);
+
+  /* Raios (derivados de --radius) */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Tema claro — Figma Primitives (Mode 1)
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --radius: 0.5rem;
+
+  /* Neutral/50 · Neutral/800 */
+  --background: hsl(210 40% 98.04%);
+  --background-hard: var(--background);
+  --foreground: hsl(217.24 32.58% 17.45%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(217.24 32.58% 17.45%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(217.24 32.58% 17.45%);
+
+  /* Blue/500 */
+  --primary: hsl(215.38 80.25% 47.65%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  /* Orange/500 */
+  --secondary: hsl(24.58 94.98% 53.14%);
+  --secondary-foreground: hsl(0 0% 100%);
+
+  /* Neutral/100 · Neutral/600 */
+  --muted: hsl(210 40% 96.08%);
+  --muted-foreground: hsl(215.29 19.32% 34.51%);
+
+  /* Blue/50 */
+  --accent: hsl(213.75 100% 96.86%);
+  --accent-foreground: hsl(217.24 32.58% 17.45%);
+
+  /* Red/500 */
+  --destructive: hsl(0 84.24% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --destructive-muted: hsl(0 85.71% 97.25%);
+  --destructive-hover: hsl(0, 100%, 81%);
+  --destructive-hover-bg: color-mix(in hsl, var(--destructive-hover) 22%, white);
+
+  /* Green/500 */
+  --success: hsl(142.09 70.56% 45.29%);
+  --success-foreground: hsl(0 0% 100%);
+  --success-muted: hsl(138.46 76.47% 96.67%);
+
+  /* Yellow/500 · Yellow/50 */
+  --warning: hsl(45.4 93.39% 47.45%);
+  --warning-hover: hsl(45, 100%, 80%);
+  --warning-foreground: hsl(217.24 32.58% 17.45%);
+  --warning-muted: hsl(54.55 91.67% 95.29%);
+
+  /* Neutral/200 */
+  --border: var(--color-neutral-200);
+  --placeholder: hsl(215 20.22% 65.1%);
+  --input: rgba(118, 118, 128, 0.06);
+  --input-hover: rgba(118, 118, 128, 0.1);
+  --input-focus: rgba(118, 118, 128, 0.09);
+
+  /* Blue/400 */
+  --ring: hsl(213.12 93.9% 67.84%);
+
+  /* Table sort — Neutral/700 (idle) · Primary (active) */
+  --table-sort-foreground: hsl(215.29 25% 26.67%);
+  --table-sort-icon: hsl(215.29 19.32% 34.51%);
+  --table-sort-active: var(--primary);
+
+  --chart-1: hsl(215.38 80.25% 47.65%);
+  --chart-2: hsl(24.58 94.98% 53.14%);
+  --chart-3: hsl(180 100% 36.27%);
+  --chart-4: hsl(142.09 70.56% 45.29%);
+  --chart-5: hsl(0 84.24% 60.2%);
+
+  --sidebar: hsl(215.29 25% 26.67%);
+  --sidebar-foreground: hsl(0 0% 100%);
+  --sidebar-primary: hsl(215.38 80.25% 47.65%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(215.29 19.32% 34.51%);
+  --sidebar-accent-foreground: hsl(0 0% 100%);
+  --sidebar-border: hsl(215.29 25% 22%);
+  --sidebar-ring: hsl(215.38 80.25% 47.65%);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Tema escuro
+   ───────────────────────────────────────────────────────────── */
+.dark {
+  --background: hsl(222.22 47.37% 11.18%);
+  --background-hard: hsl(222.22 47.37% 7%);
+  --foreground: hsl(210 40% 98.04%);
+
+  --card: hsl(217.24 32.58% 17.45%);
+  --card-foreground: hsl(210 40% 98.04%);
+
+  --popover: hsl(217.24 32.58% 17.45%);
+  --popover-foreground: hsl(210 40% 98.04%);
+
+  --primary: hsl(213.12 93.9% 67.84%);
+  --primary-foreground: hsl(222.22 47.37% 11.18%);
+
+  --secondary: hsl(24.58 94.98% 58%);
+  --secondary-foreground: hsl(222.22 47.37% 11.18%);
+
+  --muted: hsl(215.29 25% 26.67%);
+  --muted-foreground: hsl(215 20.22% 65.1%);
+
+  --accent: hsl(216.81 100% 31.96%);
+  --accent-foreground: hsl(210 40% 98.04%);
+
+  --destructive: hsl(0 84.24% 65%);
+  --destructive-foreground: hsl(210 40% 98.04%);
+  --destructive-muted: hsl(0 84.24% 60.2% / 0.15);
+  --destructive-hover: hsl(0 84.24% 55%);
+  --destructive-hover-bg: color-mix(
+    in hsl,
+    var(--destructive-hover) 28%,
+    hsl(217.24 32.58% 17.45%)
+  );
+
+  --success: hsl(142.09 70.56% 50%);
+  --success-foreground: hsl(222.22 47.37% 11.18%);
+  --success-muted: hsl(138.46 76.47% 96.67% / 0.12);
+
+  --warning: hsl(45.4 93.39% 52%);
+  --warning-foreground: hsl(222.22 47.37% 11.18%);
+  --warning-muted: hsl(54.55 91.67% 95.29% / 0.12);
+  --warning-hover: hsl(45, 100%, 70%);
+
+  --border: var(--color-neutral-700);
+  --placeholder: hsl(215 20.22% 55%);
+  --input: rgba(118, 118, 128, 0.09);
+  --input-hover: rgba(118, 118, 128, 0.125);
+  --input-focus: rgba(118, 118, 128, 0.11);
+  --ring: hsl(213.12 93.9% 67.84%);
+
+  /* Table sort — Neutral/400 (idle) · Primary (active) */
+  --table-sort-foreground: hsl(215 20.22% 65.1%);
+  --table-sort-icon: hsl(215.38 16.32% 46.86%);
+  --table-sort-active: var(--primary);
+
+  --chart-1: hsl(213.12 93.9% 67.84%);
+  --chart-2: hsl(24.58 94.98% 58%);
+  --chart-3: hsl(180 100% 40%);
+  --chart-4: hsl(142.09 70.56% 50%);
+  --chart-5: hsl(0 84.24% 65%);
+
+  --sidebar: hsl(222.22 47.37% 7%);
+  --sidebar-foreground: hsl(210 40% 98.04%);
+  --sidebar-primary: hsl(213.12 93.9% 67.84%);
+  --sidebar-primary-foreground: hsl(210 40% 98.04%);
+  --sidebar-accent: hsl(215.29 25% 26.67%);
+  --sidebar-accent-foreground: hsl(210 40% 98.04%);
+  --sidebar-border: hsl(215.29 25% 26.67%);
+  --sidebar-ring: hsl(213.12 93.9% 67.84%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-manrope);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--placeholder);
+  }
+}
+
+@layer components {
+  [data-sonner-toast] {
+    gap: 16px !important;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}

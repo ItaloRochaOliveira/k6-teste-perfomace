@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(120)
+  email        String    @unique(map: "users_email_key") @db.VarChar(190)
+  passwordHash String    @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @db.DateTime(3)
+  updatedAt    DateTime  @updatedAt @db.DateTime(3)
+  products     Product[]
+
+  @@map("users")
+}
+
+model Product {
+  id              Int       @id @default(autoincrement())
+  name            String    @db.VarChar(150)
+  description     String?   @db.Text
+  price           Decimal   @db.Decimal(10, 2)
+  stock           Int       @default(0)
+  createdByUserId Int
+  createdAt       DateTime  @default(now()) @db.DateTime(3)
+  updatedAt       DateTime  @updatedAt @db.DateTime(3)
+  deletedAt       DateTime? @db.DateTime(3)
+  createdBy       User      @relation(fields: [createdByUserId], references: [id])
+
+  @@index([name], map: "products_name_idx")
+  @@index([deletedAt, createdAt], map: "products_deletedAt_createdAt_idx")
+  @@index([createdByUserId], map: "products_createdByUserId_idx")
+  @@map("products")
+}

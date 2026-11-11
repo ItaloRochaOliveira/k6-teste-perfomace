@@ -1,0 +1,73 @@
+name: k6-teste-perfomace
+
+# Sobe banco + back + front:  docker compose up -d --build
+#   front  -> http://localhost:3000
+#   api    -> http://localhost:3006
+#   mysql  -> localhost:3306
+# A api roda `prisma migrate deploy` ao iniciar, antes de subir o servidor.
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: k6_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-k6_database}
+      MYSQL_USER: ${MYSQL_USER:-k6}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-k6_password}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - k6-rede
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: k6_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USER:-k6}:${MYSQL_PASSWORD:-k6_password}@mysql:3306/${MYSQL_DATABASE:-k6_database}?allowPublicKeyRetrieval=true
+      PORT: 3006
+      JWT_SECRET: ${JWT_SECRET:-troque_este_segredo}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-10}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "${API_PORT:-3006}:3006"
+    networks:
+      - k6-rede
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Embutida no build; é o endereço da API acessado pelo navegador
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3006}
+    container_name: k6_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - k6-rede
+    depends_on:
+      - api
+
+networks:
+  k6-rede:
+    driver: bridge
+
+volumes:
+  mysql_data:
