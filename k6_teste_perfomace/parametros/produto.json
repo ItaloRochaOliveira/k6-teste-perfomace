@@ -1,0 +1,121 @@
+{
+  "nome": "produto",
+  "baseUrl": "http://localhost:3006",
+  "mode": "sequential",
+  "carga": [
+    {
+      "vus": 10,
+      "duration": "10s",
+      "target": 10
+    },
+    {
+      "vus": 20,
+      "duration": "10s",
+      "target": 10
+    },
+    {
+      "vus": 1000,
+      "duration": "10s",
+      "target": 10
+    },
+    {
+      "vus": 1000,
+      "duration": "10s",
+      "target": 10
+    },
+    {
+      "vus": 10,
+      "duration": "10s",
+      "target": 10
+    },
+    {
+      "vus": 10,
+      "duration": "10s",
+      "target": 10
+    }
+  ],
+  "thresholds": {
+    "http_req_failed": [
+      "rate<0.01"
+    ],
+    "http_req_duration": [
+      "p(95)<800"
+    ]
+  },
+  "thinkTime": 1,
+  "login": true,
+  "usuario": {
+    "name": "K6 Usuario",
+    "email": "k6@teste.com",
+    "password": "123456"
+  },
+  "paths": {
+    "signup": "/auth/signup",
+    "login": "/auth/login"
+  },
+  "routes": [
+    {
+      "name": "criar_produto",
+      "method": "POST",
+      "path": "/products",
+      "expectedStatus": [
+        201
+      ],
+      "body": {
+        "name": "Produto k6 {{runId}}-{{vu}}-{{iter}}",
+        "description": "Criado pelo teste de carga",
+        "price": "{{randomPrice}}",
+        "stock": "{{randomStock}}"
+      },
+      "save": {
+        "productId": "id"
+      }
+    },
+    {
+      "name": "listar_produtos",
+      "method": "GET",
+      "path": "/products?page=1&pageSize=10&sortBy=createdAt&sortOrder=desc",
+      "expectedStatus": [
+        200
+      ]
+    },
+    {
+      "name": "buscar_produtos",
+      "method": "GET",
+      "path": "/products?search=Produto%20k6",
+      "expectedStatus": [
+        200
+      ]
+    },
+    {
+      "name": "buscar_produto_por_id",
+      "method": "GET",
+      "path": "/products/{{productId}}",
+      "expectedStatus": [
+        200
+      ]
+    },
+    {
+      "name": "atualizar_produto",
+      "method": "PUT",
+      "path": "/products/{{productId}}",
+      "expectedStatus": [
+        204
+      ],
+      "body": {
+        "name": "Produto k6 atualizado {{random}}",
+        "description": "Atualizado pelo teste de carga",
+        "price": "{{randomPrice}}",
+        "stock": "{{randomStock}}"
+      }
+    },
+    {
+      "name": "excluir_produto",
+      "method": "DELETE",
+      "path": "/products/{{productId}}",
+      "expectedStatus": [
+        204
+      ]
+    }
+  ]
+}

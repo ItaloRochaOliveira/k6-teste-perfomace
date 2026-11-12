@@ -7,3 +7,5 @@ logs/
 *.log
 dist/
 .next/
+k6_teste_perfomace/historico/*
+!k6_teste_perfomace/historico/.gitkeep
