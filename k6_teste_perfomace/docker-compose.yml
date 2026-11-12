@@ -1,0 +1,26 @@
+# k6 em container. Os parâmetros e o histórico ficam no repositório da APLICAÇÃO:
+#   Rode dentro de k6_teste_perfomace/. O config.js global fica um nível acima (../config.js).
+#   APP_PARAMS_DIR   pasta com os JSON da aplicação   (padrão ./parametros)
+#   APP_HISTORY_DIR  pasta do histórico               (padrão ./historico)
+#
+#   docker compose run --rm k6 run -e TESTE=auth -e BASE_URL=http://host.docker.internal:3006 /scripts/config.js
+#   APP_PARAMS_DIR=/srv/outro-app/parametros docker compose run --rm k6 run -e TESTE=auth /scripts/config.js
+services:
+  k6:
+    build: .
+    image: k6-global:local
+    working_dir: /scripts
+    environment:
+      PARAMS_DIR: /parametros
+      HISTORY_DIR: /historico
+    volumes:
+      - ../config.js:/scripts/config.js:ro              # motor global (fora da pasta da aplicação)
+      - ${APP_PARAMS_DIR:-./parametros}:/parametros:ro  # parâmetros da aplicação
+      - ${APP_HISTORY_DIR:-./historico}:/historico      # histórico da aplicação
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # cpus: "1"                # limite opcional para não disputar CPU com as aplicações
+    # mem_limit: 1g
+    profiles: ["teste"]        # não sobe com `docker compose up`; só com `run`
+
+  # Futuro: db rápido, prometheus e grafana entram aqui.

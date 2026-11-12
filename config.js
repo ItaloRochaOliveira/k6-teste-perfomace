@@ -1,13 +1,16 @@
-// Script do k6. Os valores vêm do arquivo de parâmetros escolhido em TESTE:
+// Script GLOBAL do k6 (motor único para todas as aplicações).
+// Os valores vêm de um JSON na pasta de cada aplicação (<APP>/parametros/<TESTE>.json).
+// Este arquivo fica FORA das pastas das aplicações e é compartilhado por todas:
 //
-//   k6 run -e TESTE=auth    k6_backend/config.js   -> authParams.js
-//   k6 run -e TESTE=produto k6_backend/config.js   -> produtoParams.js
+//   k6 run -e APP=k6_teste_perfomace -e TESTE=auth config.js
+//        -> lê k6_teste_perfomace/parametros/auth.json e grava em k6_teste_perfomace/historico/
+//   k6 run -e PARAMS_DIR=/caminho/parametros -e HISTORY_DIR=/caminho/historico -e TESTE=auth config.js
+//   k6 run -e PARAMS=/caminho/parametros/auth.json config.js   (caminho direto do JSON)
 //
-// (o k6 aceita um único script por execução e imports estáticos; por isso os parâmetros
-//  são importados aqui e escolhidos por TESTE. Para criar outro teste, adicione em `testes`.)
+// Para uma nova aplicação não é preciso mexer aqui. Caminhos relativos valem a partir deste arquivo.
 //
-// Cada arquivo de parâmetros exporta:
-//   { nome, baseUrl, carga: { vus, duration } | { stages }, thresholds, thinkTime,
+// Cada JSON tem:
+//   { nome, baseUrl, carga: { vus, duration } | { stages } | [ { duration, target } ], thresholds, thinkTime,
 //     mode: 'sequential' | 'independent', login: true|false, usuario,
 //     routes: [{ name, method, path, body, headers, auth, expectedStatus, save, load, sleep }] }
 //
@@ -16,23 +19,28 @@
 import http from 'k6/http';
 import { check, fail, group, sleep } from 'k6';
 
-import { authParams } from './authParams.js';
-import { produtoParams } from './produtoParams.js';
-
-const testes = { auth: authParams, produto: produtoParams };
-
-const values = testes[__ENV.TESTE];
-if (!values) {
+//   APP        = pasta da aplicação (usa APP/parametros e APP/historico)
+//   PARAMS_DIR = pasta dos JSON (substitui APP/parametros; relativa a este arquivo ou absoluta)
+//   TESTE      = nome do arquivo sem .json
+//   PARAMS     = caminho completo do JSON (substitui PARAMS_DIR + TESTE)
+const pastaParams = __ENV.PARAMS_DIR || (__ENV.APP ? __ENV.APP + '/parametros' : '');
+const arquivo =
+  __ENV.PARAMS ||
+  (__ENV.TESTE && pastaParams ? pastaParams.replace(/[\/\\]$/, '') + '/' + __ENV.TESTE + '.json' : '');
+if (!arquivo) {
   throw new Error(
-    'Informe o teste: k6 run -e TESTE=<' + Object.keys(testes).join('|') + '> k6_backend/config.js',
+    'Informe o teste: k6 run -e APP=<pasta-da-app> -e TESTE=<teste> config.js  (ou PARAMS_DIR + TESTE, ou PARAMS=<caminho.json>)',
   );
 }
+const absoluto = /^([\/\\]|[A-Za-z]:)/.test(arquivo);
+// (remove o BOM que alguns editores do Windows colocam no início do JSON)
+const values = JSON.parse(open(absoluto ? arquivo : './' + arquivo).replace(/^﻿/, ''));
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 const baseUrl = String(__ENV.BASE_URL || values.baseUrl).replace(/\/$/, '');
 const routes = values.routes || [];
 const thinkTime = values.thinkTime || 0;
-const historicoDir = __ENV.HISTORY_DIR || values.historicoDir || 'k6_backend/historico';
+const historicoDir = __ENV.HISTORY_DIR || values.historicoDir || (__ENV.APP ? __ENV.APP + '/historico' : 'historico');
 const runId = Date.now();
 
 function pick(obj, path) {
@@ -109,9 +117,12 @@ function runRoute(route, ctx, token) {
 
 // ---- options (carga e thresholds vêm do arquivo de parâmetros) ---------------
 function buildOptions() {
+  // carga pode ser { vus, duration }, { stages } ou uma lista de etapas [{ duration, target }]
+  const lista = Array.isArray(values.carga) ? values.carga : null;
+  const cargaObj = lista ? {} : values.carga || {};
   const carga = {
-    vus: Number(__ENV.VUS || (values.carga && values.carga.vus) || 10),
-    duration: __ENV.DURATION || (values.carga && values.carga.duration) || '30s',
+    vus: Number(__ENV.VUS || cargaObj.vus || 10),
+    duration: __ENV.DURATION || cargaObj.duration || '30s',
   };
   const options = { thresholds: Object.assign({}, values.thresholds) };
 
@@ -121,8 +132,10 @@ function buildOptions() {
     if (!options.thresholds[key]) options.thresholds[key] = ['max>=0'];
   });
 
-  if (values.carga && values.carga.stages) {
-    options.stages = values.carga.stages;
+  if (lista) {
+    options.stages = lista.map((etapa) => ({ duration: etapa.duration, target: etapa.target }));
+  } else if (cargaObj.stages) {
+    options.stages = cargaObj.stages;
   } else if (values.mode !== 'independent') {
     options.vus = carga.vus;
     options.duration = carga.duration;

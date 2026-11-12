@@ -16,7 +16,7 @@ Projeto de **teste de carga com k6** executado contra uma aplicação completa (
 - ✅ Listagem com paginação, busca e ordenação
 - ✅ Validação de entrada com **Zod**
 
-### 📈 Testes de carga (`k6_backend`)
+### 📈 Testes de carga (`config.js` + `k6_teste_perfomace/`)
 - ✅ Um único script (`config.js`) que lê os valores de arquivos de parâmetros
 - ✅ Dois testes prontos: `auth` e `produto`
 - ✅ **Resumo em português** no terminal (APROVADO/REPROVADO por limites)
@@ -68,11 +68,12 @@ k6-teste-perfomace/
 │   │   └── middleware.ts          # protege rotas pelo cookie k6_token
 │   ├── Dockerfile
 │   └── package.json
-├── k6_backend/                    # Testes de carga
-│   ├── config.js                  # script do k6 (motor)
-│   ├── authParams.js              # parâmetros do teste de auth
-│   ├── produtoParams.js           # parâmetros do teste de produto
-│   └── historico/                 # um JSON por execução
+├── config.js                      # script do k6 (motor global, fora das pastas de app)
+├── k6_teste_perfomace/            # pasta k6 desta aplicação
+│   ├── parametros/                # auth.json e produto.json
+│   ├── historico/                 # um JSON por execução
+│   ├── Dockerfile                 # imagem do k6
+│   └── docker-compose.yml         # serviço k6 (volumes: config, parâmetros, histórico)
 ├── docker-compose.yml             # Orquestração dos serviços
 └── README.md                      # Este arquivo
 ```
@@ -128,12 +129,12 @@ npm run dev
 O k6 aceita um único script por execução. O teste é escolhido pela variável `TESTE`:
 
 ```bash
-k6 run -e TESTE=auth    k6_backend/config.js
-k6 run -e TESTE=produto k6_backend/config.js
+k6 run -e APP=k6_teste_perfomace -e TESTE=auth    config.js
+k6 run -e APP=k6_teste_perfomace -e TESTE=produto config.js
 ```
 
 ### Como funciona
-`config.js` é o motor: importa `authParams.js` e `produtoParams.js` e usa o que vier em `TESTE`. Os arquivos de parâmetros têm **somente dados**, sem lógica.
+`config.js` é o motor: lê `<APP>/parametros/<TESTE>.json` e serve a qualquer aplicação. Os parâmetros são JSON, **somente dados**. Detalhes em `k6_teste_perfomace/README.md`.
 
 | Etapa | O que faz |
 |-------|-----------|
@@ -169,9 +170,9 @@ Exemplo: `save: { productId: 'id' }` guarda o `id` da resposta para usar em `/pr
 
 ### Sobrescrever na linha de comando
 ```bash
-k6 run -e TESTE=produto -e VUS=50 -e DURATION=2m k6_backend/config.js
-k6 run -e TESTE=auth -e BASE_URL=http://localhost:3006 k6_backend/config.js
-k6 run -e TESTE=auth -e HISTORY_DIR=outra/pasta k6_backend/config.js
+k6 run -e APP=k6_teste_perfomace -e TESTE=produto -e VUS=50 -e DURATION=2m config.js
+k6 run -e APP=k6_teste_perfomace -e TESTE=auth -e BASE_URL=http://localhost:3006 config.js
+k6 run -e APP=k6_teste_perfomace -e TESTE=auth -e HISTORY_DIR=outra/pasta config.js
 ```
 
 ### Exemplo de resultado
@@ -193,7 +194,7 @@ RESULTADO: APROVADO - todos os limites foram atendidos.
 ```
 
 ### Histórico
-A cada execução é gravado `k6_backend/historico/<nome>-<data-hora>.json` com o resumo completo do k6.
+A cada execução é gravado `k6_teste_perfomace/historico/<nome>-<data-hora>.json` com o resumo completo do k6.
 > O k6 **não cria pastas**: a pasta `historico/` precisa existir (já há um `.gitkeep`).
 
 ### Como ler o resultado
@@ -241,11 +242,11 @@ Confira se o MySQL ficou saudável (`docker compose ps`) e se a `DATABASE_URL` u
 #### `k6 run` pede argumento
 O comando precisa do caminho do script:
 ```bash
-k6 run -e TESTE=auth k6_backend/config.js
+k6 run -e APP=k6_teste_perfomace -e TESTE=auth config.js
 ```
 
 #### Erro ao gravar o histórico
-Verifique se a pasta `k6_backend/historico` existe.
+Verifique se a pasta `k6_teste_perfomace/historico` existe.
 
 #### Muitas falhas no teste de `auth`
 Confira se a API está de pé em `http://localhost:3006` e se o `BCRYPT_ROUNDS` não está alto demais para a carga escolhida.
